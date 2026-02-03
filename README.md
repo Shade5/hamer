@@ -18,27 +18,16 @@ Code repository for the paper:
 ## Installation
 First you need to clone the repo:
 ```
-git clone --recursive https://github.com/geopavlakos/hamer.git
+git clone --recursive https://github.com/Shade5/hamer.git
 cd hamer
 ```
 
-We recommend creating a virtual environment for HaMeR. You can use venv:
+We recommend using [uv](https://docs.astral.sh/uv/) for installation:
 ```bash
-python3.10 -m venv .hamer
-source .hamer/bin/activate
-```
-
-or alternatively conda:
-```bash
-conda create --name hamer python=3.10
-conda activate hamer
-```
-
-Then, you can install the rest of the dependencies. This is for CUDA 11.7, but you can adapt accordingly:
-```bash
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu117
-pip install -e .[all]
-pip install -v -e third-party/ViTPose
+uv sync
+source .venv/bin/activate
+uv pip install "git+https://github.com/facebookresearch/detectron2.git@a1ce2f9" --no-build-isolation --no-deps
+uv pip install -e third-party/ViTPose --no-build-isolation
 ```
 
 You also need to download the trained models:
@@ -69,6 +58,11 @@ bash fetch_demo_data.sh
 ```
 
 ## Demo
+```bash
+python demo_simple.py
+```
+
+For more options:
 ```bash
 python demo.py \
     --img_folder example_data --out_folder demo_out \
