@@ -18,7 +18,7 @@ class ViTPoseModel(object):
     MODEL_DICT = {
         'ViTPose+-G (multi-task train, COCO)': {
             'config': f'{VIT_DIR}/configs/wholebody/2d_kpt_sview_rgb_img/topdown_heatmap/coco-wholebody/ViTPose_huge_wholebody_256x192.py',
-            'model': f'{ROOT_DIR}/_DATA/vitpose_ckpts/vitpose+_huge/wholebody.pth',
+            'model': f'{ROOT_DIR}/_DATA/vitpose_ckpts/vitpose+_huge/wholebody_clean.pth',
         },
     }
 
