@@ -257,7 +257,7 @@ def draw_hands(img_rgb: np.ndarray, keypoints: dict) -> np.ndarray:
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--hand-detector', type=str, default='vitpose',
+    parser.add_argument('--hand-detector', type=str, default='mediapipe',
                         choices=['vitpose', 'mediapipe'],
                         help='Hand bbox detector to use (default: vitpose)')
     args = parser.parse_args()
