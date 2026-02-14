@@ -21,7 +21,6 @@ from hamer.configs import CACHE_DIR_HAMER
 from hamer.models import download_models, load_hamer, DEFAULT_CHECKPOINT
 from hamer.utils import recursive_to
 from hamer.utils.renderer import cam_crop_to_full
-from vitpose_model import ViTPoseModel
 
 OUTPUT_DIR = Path("outputs_simplified")
 
@@ -256,6 +255,14 @@ def draw_hands(img_rgb: np.ndarray, keypoints: dict) -> np.ndarray:
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--hand-detector', type=str, default='mediapipe',
+                        choices=['vitpose', 'mediapipe'],
+                        help='Hand bbox detector to use (default: vitpose)')
+    args = parser.parse_args()
+    hand_detector_type = args.hand_detector
+
     OUTPUT_DIR.mkdir(exist_ok=True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -267,8 +274,15 @@ def main():
     model = model.to(device)
     model.eval()
 
-    print("Loading ViTPose...")
-    vitpose_model = ViTPoseModel(device)
+    if hand_detector_type == "mediapipe":
+        from mediapipe_hand_detector import MediaPipeHandDetector
+        print("Loading MediaPipe hand detector...")
+        mp_model_path = "/mnt/sunny_nas/weights/hamer_weights/hand_landmarker.task"
+        hand_detector = MediaPipeHandDetector(mp_model_path)
+    elif hand_detector_type == "vitpose":
+        from vitpose_model import ViTPoseModel
+        print("Loading ViTPose...")
+        vitpose_model = ViTPoseModel(device)
 
     rescale_factor = 2.0
 
@@ -290,20 +304,22 @@ def main():
 
     print("Processing video...")
     all_keypoints = {}  # pts -> keypoints
+    frame_idx = 0
 
     for frame in tqdm(in_container.decode(in_stream), total=out_stream.frames):
         img = frame.to_ndarray(format="rgb24")
         img_rgb = img[:1024]  # Left half
         img_bgr = img_rgb[:, :, ::-1].copy()
 
-        h, w = img_rgb.shape[:2]
-        full_bbox = np.array([[0, 0, w, h, 1.0]])
-
-        # ViTPose
-        vitposes_out = vitpose_model.predict_pose(img_rgb, [full_bbox])
-
-        # Extract hand bboxes
-        boxes, is_right = extract_hand_bboxes(vitposes_out)
+        # Hand detection
+        if hand_detector_type == "mediapipe":
+            timestamp_ms = int(frame_idx * 1000 / 30)
+            boxes, is_right = hand_detector.detect(img_rgb, timestamp_ms)
+        else:
+            h, w = img_rgb.shape[:2]
+            vitposes_out = vitpose_model.predict_pose(img_rgb, [np.array([[0, 0, w, h, 1.0]])])
+            boxes, is_right = extract_hand_bboxes(vitposes_out)
+        frame_idx += 1
         if boxes is None:
             all_keypoints[frame.pts] = None
             out_frame = av.VideoFrame.from_ndarray(img_rgb, format="rgb24")
@@ -335,6 +351,8 @@ def main():
 
     out_container.close()
     in_container.close()
+    if hand_detector_type == "mediapipe":
+        hand_detector.close()
     print(f"Saved to {OUTPUT_DIR / 'out.mkv'}")
 
     # Save keypoints
