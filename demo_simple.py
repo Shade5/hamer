@@ -260,6 +260,9 @@ def main():
     parser.add_argument('--hand-detector', type=str, default='mediapipe',
                         choices=['vitpose', 'mediapipe'],
                         help='Hand bbox detector to use (default: vitpose)')
+    parser.add_argument("video_path", type=str, nargs="?",
+                    default = "/mnt/sunny_nas/ai_logs/ailog_RIG-D05_2026_02_02-20_27_04_2f8ea9e2/video.mp4",
+                    help = "Path to input video file")
     args = parser.parse_args()
     hand_detector_type = args.hand_detector
 
@@ -287,7 +290,7 @@ def main():
     rescale_factor = 2.0
 
     # Open video
-    video_path = '/mnt/sunny_nas/ai_logs/ailog_RIG-D05_2026_02_02-20_27_04_2f8ea9e2/video.mp4'
+    video_path = args.video_path
     in_container = av.open(video_path, "r")
     in_stream = in_container.streams.video[0]
     in_stream.thread_type = "AUTO"

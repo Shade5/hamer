@@ -24,5 +24,5 @@ If the mano files are missing, need to download the MANO model. Please visit the
 
 ## Demo
 ```bash
-python demo_simple.py
+python demo_simple.py /mnt/sunny_nas/ai_logs/ailog_RIG-D06_2026_02_19-00_21_01_90942ad5/video.mp4
 ```
