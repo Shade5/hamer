@@ -14,6 +14,7 @@ We recommend using [uv](https://docs.astral.sh/uv/) for installation:
 ```bash
 uv sync
 source .venv/bin/activate
+uv pip install mmcv==1.3.9 --no-build-isolation
 uv pip install --force-reinstall --no-binary xtcocotools xtcocotools --no-build-isolation
 uv pip install "git+https://github.com/facebookresearch/detectron2.git@a1ce2f9" --no-build-isolation --no-deps
 uv pip install -e third-party/ViTPose --no-build-isolation
